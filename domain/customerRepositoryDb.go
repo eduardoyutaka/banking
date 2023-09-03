@@ -2,13 +2,10 @@ package domain
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/eduardoyutaka/banking/errs"
 	"github.com/eduardoyutaka/banking/logger"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"os"
-	"time"
 )
 
 type CustomerRepositoryDb struct {
@@ -20,10 +17,10 @@ func (d CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError
 	customers := make([]Customer, 0)
 
 	if status == "" {
-		findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
+		findAllSql := "SELECT customer_id, name, city, zipcode, date_of_birth, status FROM customers"
 		err = d.client.Select(&customers, findAllSql)
 	} else {
-		findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where status = ?"
+		findAllSql := "SELECT customer_id, name, city, zipcode, date_of_birth, status FROM customers WHERE status = ?"
 		err = d.client.Select(&customers, findAllSql, status)
 	}
 
@@ -36,7 +33,7 @@ func (d CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError
 }
 
 func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
-	customerSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where customer_id = ?"
+	customerSql := "SELECT customer_id, name, city, zipcode, date_of_birth, status FROM customers WHERE customer_id = ?"
 
 	var c Customer
 	err := d.client.Get(&c, customerSql, id)
@@ -51,20 +48,6 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	return &c, nil
 }
 
-func NewCustomerRepositoryDb() CustomerRepositoryDb {
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWD")
-	dbAddr := os.Getenv("DB_ADDR")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbAddr, dbPort, dbName)
-	client, err := sqlx.Open("mysql", dataSource)
-	if err != nil {
-		panic(err)
-	}
-
-	client.SetConnMaxLifetime(time.Minute * 3)
-	client.SetMaxOpenConns(10)
-	client.SetMaxIdleConns(10)
-	return CustomerRepositoryDb{client}
+func NewCustomerRepositoryDb(dbClient *sqlx.DB) CustomerRepositoryDb {
+	return CustomerRepositoryDb{dbClient}
 }
