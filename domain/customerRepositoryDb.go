@@ -2,13 +2,13 @@ package domain
 
 import (
 	"database/sql"
-  "fmt"
-	"github.com/jmoiron/sqlx"
-  "github.com/eduardoyutaka/banking/errs"
-  "github.com/eduardoyutaka/banking/logger"
+	"fmt"
+	"github.com/eduardoyutaka/banking/errs"
+	"github.com/eduardoyutaka/banking/logger"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	"os"
 	"time"
-  "os"
 )
 
 type CustomerRepositoryDb struct {
@@ -16,16 +16,16 @@ type CustomerRepositoryDb struct {
 }
 
 func (d CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError) {
-  var err error
+	var err error
 	customers := make([]Customer, 0)
 
-  if status == "" {
-    findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
-    err = d.client.Select(&customers, findAllSql)
-  } else {
-    findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where status = ?"
-    err = d.client.Select(&customers, findAllSql, status)
-  }
+	if status == "" {
+		findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers"
+		err = d.client.Select(&customers, findAllSql)
+	} else {
+		findAllSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where status = ?"
+		err = d.client.Select(&customers, findAllSql, status)
+	}
 
 	if err != nil {
 		logger.Error("Error while querying customer table " + err.Error())
@@ -39,7 +39,7 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	customerSql := "select customer_id, name, city, zipcode, date_of_birth, status from customers where customer_id = ?"
 
 	var c Customer
-  err := d.client.Get(&c, customerSql, id)
+	err := d.client.Get(&c, customerSql, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errs.NewNotFoundError("Customer not found")
@@ -52,12 +52,12 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 }
 
 func NewCustomerRepositoryDb() CustomerRepositoryDb {
-  dbUser := os.Getenv("DB_USER")
-  dbPassword := os.Getenv("DB_PASSWD")
-  dbAddr := os.Getenv("DB_ADDR")
-  dbPort := os.Getenv("DB_PORT")
-  dbName := os.Getenv("DB_NAME")
-  dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbAddr, dbPort, dbName)
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWD")
+	dbAddr := os.Getenv("DB_ADDR")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbAddr, dbPort, dbName)
 	client, err := sqlx.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)

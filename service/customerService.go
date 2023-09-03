@@ -1,43 +1,43 @@
 package service
 
 import (
-  "github.com/eduardoyutaka/banking/domain"
-  "github.com/eduardoyutaka/banking/dto"
-  "github.com/eduardoyutaka/banking/errs"
+	"github.com/eduardoyutaka/banking/domain"
+	"github.com/eduardoyutaka/banking/dto"
+	"github.com/eduardoyutaka/banking/errs"
 )
 
 type CustomerService interface {
-  GetAllCustomer(string) ([]domain.Customer, *errs.AppError)
-  GetCustomer(string) (*dto.CustomerResponse, *errs.AppError)
+	GetAllCustomer(string) ([]domain.Customer, *errs.AppError)
+	GetCustomer(string) (*dto.CustomerResponse, *errs.AppError)
 }
 
 type DefaultCustomerService struct {
-  repo domain.CustomerRepository
+	repo domain.CustomerRepository
 }
 
 func (s DefaultCustomerService) GetAllCustomer(status string) ([]domain.Customer, *errs.AppError) {
-  if status == "active" {
-    status = "1"
-  } else if status == "inactive" {
-    status = "0"
-  } else {
-    status = ""
-  }
+	if status == "active" {
+		status = "1"
+	} else if status == "inactive" {
+		status = "0"
+	} else {
+		status = ""
+	}
 
-  return s.repo.FindAll(status)
+	return s.repo.FindAll(status)
 }
 
 func (s DefaultCustomerService) GetCustomer(id string) (*dto.CustomerResponse, *errs.AppError) {
-  c, err := s.repo.ById(id)
-  if err != nil {
-    return nil, err
-  }
+	c, err := s.repo.ById(id)
+	if err != nil {
+		return nil, err
+	}
 
-  response := c.ToDto()
+	response := c.ToDto()
 
-  return &response, nil
+	return &response, nil
 }
 
 func NewCustomerService(repository domain.CustomerRepository) DefaultCustomerService {
-  return DefaultCustomerService{repository}
+	return DefaultCustomerService{repository}
 }

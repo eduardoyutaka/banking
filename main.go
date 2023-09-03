@@ -1,11 +1,11 @@
 package main
 
 import (
-  "github.com/eduardoyutaka/banking/app"
-  "github.com/eduardoyutaka/banking/logger"
+	"github.com/eduardoyutaka/banking/app"
+	"github.com/eduardoyutaka/banking/logger"
 )
 
 func main() {
-  logger.Info("Starting the application...")
+	logger.Info("Starting the application...")
 	app.Start()
 }
